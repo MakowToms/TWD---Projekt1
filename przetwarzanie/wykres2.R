@@ -1,6 +1,6 @@
 # po znalezieniu kto ma ile jakich mocy
 
-final <- data.table(read.csv("final.csv"))
+final <- data.table(read.csv("przetwarzanie/final.csv"))
 
 final <- final[,c(2,3,53:56)]
 final <- final[order(-n)]
@@ -24,6 +24,7 @@ tmp[order(tmp$number)]
 
 ggplot(tmp[order(tmp$number)], aes(x=hero, y=value, fill=variable)) +
   geom_bar(stat="identity") +
+  scale_x_discrete(limits = final$hero[20:1]) +
   coord_flip()+
   scale_fill_manual(values = c("#636363","#ca0020","#0571b0")) +
-  labs(y = "",x ="", title="Jaki rozklad mocy maja najazniejsze postacie?")
+  labs(y = "",x ="", title="Jaki rozklad mocy maja najważniejsze postacie?")
