@@ -1,11 +1,16 @@
 #install.packages('igraph')
 #install.packages('readr')
+#install.packages('png')
+#install.packages('jpeg')
+#install.packages('data.table')
 library(igraph)
 library(ggplot2)
 library(readr)
 library(dplyr)
 library(data.table)
-#install.packages('data.table')
+library(patchwork)
+library(png)
+library(jpeg)
 
 #wczytanie
 nodes <- read.csv('dataset/nodes.csv')
@@ -17,7 +22,7 @@ merged <- merge(hero1,hero2,all=TRUE,by.x = "hero1",by.y = "hero2")
 #NA-s should be replaced
 merged$n <- (merged$N.x + merged$N.y)
 merged <- merged[,c(1,4)]
-top20 <- merged[order(-n)][1:10]
+top20 <- merged[order(-n)][1:20]
 #powyżej zmienia się 10 na inną liczbę, żeby było tylu superbohaterów
 heros <- hero_network[, .(.N), by = .(hero1,hero2)][order(-N)]
 
@@ -27,7 +32,9 @@ labels <- c("CAPTAIN AMERICA","SPIDER-MAN","IRON MAN","THOR","THING","WOLVERINE"
             "HULK","ANT-MAN")
 
 if_both_of_heros_in_top_20 <- function (x) if(any(rep(x[1],20)==top20$hero1) & any(rep(x[2],20)==top20$hero1)) 1 else 0
-which_rows_of_hero_network <- apply(hero_network,1,if_both_of_heros_in_top_20)
+#which_rows_of_hero_network <- apply(hero_network,1,if_both_of_heros_in_top_20)
+#saveRDS(which_rows_of_hero_network,'which_rows_of_hero_network.RDS')
+which_rows_of_hero_network = readRDS('which_rows_of_hero_network.RDS')
 hn_edges <- hero_network[which_rows_of_hero_network==1, .(.N), by = .(hero1,hero2)][order(-N)]
 #brzydkie :(
 hn_edges2 <- hn_edges[1,]
@@ -41,6 +48,8 @@ for (i in 2:nrow(hn_edges)) {
   }
   else {hn_edges2 <- rbind(hn_edges2,hn_edges[i])}
 }
+#saveRDS(hn_edges2,'hn_edges2.RDS')
+#hn_edges2 = readRDS('hn_edges2.RDS')
 hn_edges <- hn_edges2
 
 edge_colors <- rep('red',nrow(hn_edges))
@@ -49,12 +58,15 @@ edge_colors[as.numeric(hn_edges$N)>380L] <- 'blue'
 #hn_edges <- hn_edges[as.numeric(N)>380L]
 hn_edges[] <- lapply(hn_edges, as.character)
 network1 <- graph_from_data_frame(hn_edges, directed = F, top20$hero1)
-plot.igraph(network1,vertex.label = labels[1:10], #labels[1:tylu_ilu_bohaterow]
+img <- readJPEG('images/superhero.jpeg')
+V(network1)$raster <- replicate(vcount(network1), img, simplify=FALSE)
+plot.igraph(network1,vertex.shape="raster",vertex.label = labels,#[1:10], #labels[1:tylu_ilu_bohaterow]
             # vertex.size = 10, vertex.label.cex = 1,
             edge.width = as.numeric(hn_edges$N)/50,
             edge.color = edge_colors,
             main = "a Network Relationship between Heroes")
 ?plot.igraph
+
 
 
 

@@ -1,4 +1,12 @@
 # po znalezieniu kto ma ile jakich mocy
+library(igraph)
+library(ggplot2)
+library(readr)
+library(dplyr)
+library(data.table)
+library(patchwork)
+library(jpeg)
+library(png)
 
 final <- data.table(read.csv("przetwarzanie/final.csv"))
 
@@ -20,11 +28,28 @@ tmp <- final[,-6]
 tmp <- melt(tmp[,-2], id=c("hero","number"))
 tmp[order(tmp$number)]
 
-# tmp$hero <- factor(tmp$hero, levels = tmp$hero[order(tmp$number)])
-
-ggplot(tmp[order(tmp$number)], aes(x=hero, y=value, fill=variable)) +
+w1 <- ggplot(tmp[order(tmp$number)], aes(x=hero, y=value, fill=variable)) +
   geom_bar(stat="identity") +
-  scale_x_discrete(limits = final$hero[20:1]) +
+  scale_x_discrete(limits = final$hero[20:1], labels=rep('',20)) +
   coord_flip()+
   scale_fill_manual(values = c("#636363","#ca0020","#0571b0")) +
-  labs(y = "",x ="", title="Jaki rozklad mocy maja najważniejsze postacie?")
+  labs(y = "",x ="", title="Jaki rozklad mocy maja najważniejsze postacie?",fill='Rodzaj mocy')
+
+library('gridGraphics')
+
+img <- readJPEG('images/superhero.jpeg')
+g <- rasterGrob(img, interpolate=FALSE)
+#tmp3 <- data.frame(x=1:20,y=1,z=rep(g,20))
+#w3 <- ggplot(tmp3, aes(x = x, y = y, shape=z)) +
+  #annotation_custom(g, xmin=1, xmax=3, ymin=1, ymax=3) +
+w3 <- qplot(1:20, rep(1,20), geom="blank") +
+  annotation_custom(g, xmin=1.5, xmax=2.5, ymin=0.9, ymax=1.1) +
+  annotation_custom(g, xmin=2.5, xmax=3.5, ymin=0.9, ymax=1.1) +
+  geom_point() +
+  theme_void() +
+  coord_flip() +
+  theme(legend.position = "none")
+
+w3 + w1
+
+
