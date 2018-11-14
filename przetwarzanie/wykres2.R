@@ -1,3 +1,6 @@
+library(ggplot2)
+library(data.table)
+
 # po znalezieniu kto ma ile jakich mocy
 
 final <- data.table(read.csv("final.csv"))
