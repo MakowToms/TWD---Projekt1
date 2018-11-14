@@ -10,7 +10,6 @@ library(data.table)
 library(patchwork)
 library(jpeg)
 library(png)
-library(igraph)
 
 final <- data.table(read.csv("przetwarzanie/final.csv"))
 
